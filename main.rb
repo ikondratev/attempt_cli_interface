@@ -1,12 +1,14 @@
 require './config/initialize'
 
+# Class for sending actions
+# ...
 menu = Menu.new
 
-# add map for choosing type of actions
+# Add map for choosing type of actions
 # ...
 AVAILABLE_ACTIONS = { create_train: { title: "create new train by type", action: "create_train" } }.freeze
 
-# It's just a simple example
+# It's just an example
 # TODO: will create cli interface for adding params
 # ...
 user_chosen_action = "create_train".to_sym
