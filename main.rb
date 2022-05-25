@@ -1,24 +1,30 @@
 require './config/initialize'
 
-# Class for sending actions
-# ...
-menu = Menu.new
+def create_train(command)
+  puts "Enter trains type: "
+  trains_type = gets.chomp.to_s
 
-# Add map for choosing type of actions
-# ...
-AVAILABLE_ACTIONS = { create_train: { title: "create new train by type", action: "create_train" } }.freeze
+  puts "Entre route: "
+  trains_route = gets.chomp.to_s
 
-# It's just an example
-# TODO: will create cli interface for adding params
-# ...
-user_chosen_action = "create_train".to_sym
-user_added_train_type = "passengers"
-user_added_route = "route"
+  train =  Menu.send(command, trains_type, trains_route)
 
-# It's main flow for choosing action by user's params
-# ...
-if AVAILABLE_ACTIONS.include?(user_chosen_action)
-  menu.send(AVAILABLE_ACTIONS[user_chosen_action][:action], user_added_train_type, user_added_route)
-else
-  puts "actions is not available"
+  !!train ? (puts "Create new train: #{train.type}") : (puts "Train wasn't created")
+end
+
+loop do
+  puts "Available commands:"
+
+  Config::Constants::AVAILABLE_ACTIONS.each do | _k, v|
+    puts "----- #{v[:action]}\n"
+  end
+
+  puts "Enter command:"
+  user_chose = gets.chomp
+
+  if Config::Constants::AVAILABLE_ACTIONS.include?(user_chose.to_sym)
+    send(user_chose, Config::Constants::AVAILABLE_ACTIONS[user_chose.to_sym][:action])
+  end
+
+  return if Config::Constants::EXIT_COMMANDS.include?(user_chose)
 end
