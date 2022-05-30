@@ -11,9 +11,8 @@ module Trains
           else
             raise "Type is not allowed"
           end
-        rescue StandardError => e
-          puts "#{e.message}"
-          nil
+        rescue  StandardError => e
+          raise Trains::FactoryError.new, e.message
         end
       end
     end
