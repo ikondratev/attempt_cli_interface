@@ -1,11 +1,14 @@
 module Trains
   class BaseTrain
-    attr_reader :current_station, :type
+    attr_reader :current_station, :number
 
-    def initialize(route:)
-      @route = route
+    def initialize(number:)
+      @number = number
       @current_station = 0
+      @route = nil
     end
+
+    protected
 
     def next_station
       return if @route.stations.empty?
@@ -31,6 +34,10 @@ module Trains
       return unless previous_station
 
       @current_station -= 1
+    end
+
+    def to_s
+      "Train's number: #{@number}, train's type: #{@type}"
     end
   end
 end

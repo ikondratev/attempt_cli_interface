@@ -2,27 +2,43 @@ class InteractionMenu
   attr_reader :trains
 
   def initialize
-    @trains = []
+    @objects = {
+      trains: []
+    }
   end
 
   def create_train
-    puts "Enter trains type: "
+    puts "Enter trains type:"
     type = gets.chomp.to_s
 
-    puts "Entre route: "
-    route = gets.chomp.to_s
+    puts "Entre number:"
+    number = gets.chomp.to_i
 
-    @trains <<  Trains::Services::Factory.create_train(type: type, route: route)
-  rescue BaseError => e
-    puts e.message
+    @objects[:trains] <<  Trains::Services::Factory.create_train(type: type, number: number)
+  rescue StandardError => e
+    raise InteractionMenuError, e.message
   end
 
   def show
+    clear
+
+    puts "Available objects:"
     show_available_objects
 
-    show_available_actions
+    taping_info(Config::Constants::AVAILABLE_ACTIONS, "Available commands:")
 
-    show_exit_commands
+    taping_info(Config::Constants::EXIT_COMMANDS, "Exit commands:")
+  end
+
+  def present_objects
+    puts "Choose objects:"
+    show_available_objects
+
+    user_choice = gets.chomp.to_sym
+
+    raise "Unavailable object" unless @objects.include?(user_choice.to_sym)
+
+    taping_info(@objects[user_choice.to_sym], user_choice)
   end
 
   def create_route
@@ -35,20 +51,24 @@ class InteractionMenu
 
   private
 
-  def show_available_actions
-    puts "Available commands:"
-    Config::Constants::AVAILABLE_ACTIONS.each do | _k, v|
-      puts "----- #{v[:action]}\n"
-    end
+  def clear
+    puts "\e[H\e[2J"
   end
 
-  def show_exit_commands
-    puts "Exit commands:"
-    Config::Constants::EXIT_COMMANDS.each { |command| puts "----- #{command}\n" }
+  def taping_info(objects, title)
+    return if objects.empty?
+
+    puts title
+    objects.each { |obj| puts "----- #{obj.to_s}\n" }
+  rescue StandardError => e
+    raise InteractionMenuError, e.message
   end
 
   def show_available_objects
-    puts "Available objects:"
-    puts "----- Trains: #{@trains.size}" unless @trains.empty?
+    @objects.each do |k, v|
+      next if v.empty?
+
+      puts "----- #{k}: #{v.size}\n"
+    end
   end
 end
