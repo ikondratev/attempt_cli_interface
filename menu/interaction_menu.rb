@@ -1,8 +1,21 @@
 require './menu/commands/train'
+require './menu/commands/support'
 
 module Menu
+  module Text
+    AVAILABLE_COMMANDS = "Available commands:".freeze
+    EXIT_COMMANDS = "Exit commands:".freeze
+    AVAILABLE_OBJECTS = "Available objects:".freeze
+    UNAVAILABLE_OBJECT = "Unavailable object".freeze
+    AVAILABLE_OBJECTS_ACTIONS = "Available objects actions:".freeze
+    CHOOSE_OBJECTS_GROUP = "Choose objects group:".freeze
+    NOTHING_TO_VIEW = "Nothing to show".freeze
+    CHOOSE_INDEX = "Choose index:".freeze
+  end
+
   class InteractionMenu
-    include Menu::Commands::Train
+    extend Menu::Commands::Train
+    extend Menu::Commands::Support
 
     attr_reader :trains
 
@@ -13,82 +26,72 @@ module Menu
     end
 
     def create_train
-      puts "Enter trains type:"
-      type = gets.chomp.to_s
-
-      puts "Entre number:"
-      number = gets.chomp.to_i
-
-      @objects[:trains] <<  Trains::Services::Factory.create_train(type: type, number: number)
-    rescue StandardError => e
+      @objects[:trains] <<  InteractionMenu.create_new_train
+    rescue Menu::Error => e
       raise Menu::InteractionMenuError, e.message
     end
 
     def show
-      clear
-
-      puts "Available objects:"
-      show_available_objects
-
-      taping_info(Config::Constants::AVAILABLE_ACTIONS, "Available commands:")
-
-      taping_info(Config::Constants::EXIT_COMMANDS, "Exit commands:")
+      InteractionMenu.clear
+      InteractionMenu.taping_info(available_items, Menu::Text::AVAILABLE_OBJECTS)
+      InteractionMenu.taping_info(Config::Constants::AVAILABLE_ACTIONS, Menu::Text::AVAILABLE_COMMANDS)
+      InteractionMenu.taping_info(Config::Constants::EXIT_COMMANDS, Menu::Text::EXIT_COMMANDS)
+    rescue Menu::Error => e
+      raise Menu::InteractionMenuError, e.message
     end
 
     def present_objects
-      puts "Choose objects group:"
-      show_available_objects
+      raise Menu::Text::NOTHING_TO_VIEW if available_items.empty?
+
+      InteractionMenu.clear
+      InteractionMenu.taping_info(available_items, Menu::Text::CHOOSE_OBJECTS_GROUP)
 
       user_choice = gets.chomp.to_sym
 
-      raise "Unavailable object" unless @objects.include?(user_choice.to_sym)
+      raise Menu::Text::UNAVAILABLE_OBJECT unless @objects.include?(user_choice.to_sym)
 
       collection = @objects[user_choice.to_sym]
 
-      taping_info(collection, user_choice)
+      actions_by_collections_type(collection, user_choice)
+    rescue StandardError => e
+      raise Menu::InteractionMenuError, e.message
+    end
 
-      puts "Choose object's index:"
+    def actions_by_collections_type(collection, user_choice)
+      InteractionMenu.taping_info(collection, user_choice, true)
+
+      puts Menu::Text::CHOOSE_INDEX
       index_object = gets.chomp.to_i
 
       obj = collection[index_object]
       puts obj.to_s
 
-      puts "Choose index action for #{user_choice}"
-      taping_info(Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym], "Available objects actions:")
+      puts "#{Menu::Text::CHOOSE_INDEX} #{user_choice}"
+      InteractionMenu.taping_info(
+        Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym],
+        Menu::Text::AVAILABLE_OBJECTS_ACTIONS,
+        true
+      )
       actions_index = gets.chomp.to_i
 
-      send(Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym][actions_index], collection, index_object)
-    end
+      action_params = {
+        collection: collection,
+        user_choice: user_choice,
+        index: index_object
+      }
 
-    def create_route
-      # TODO: Implement me
-    end
-
-    def create_station
-      # TODO: Implement me
+      InteractionMenu.send(
+        Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym][actions_index],
+        action_params
+      )
+    rescue Menu::Error => e
+      raise Menu::InteractionMenuError, e.message
     end
 
     private
 
-    def clear
-      puts "\e[H\e[2J"
-    end
-
-    def taping_info(objects, title)
-      return if objects.empty?
-
-      puts title
-      objects.each_with_index { |obj, index| puts "#{index} ----- #{obj.to_s}\n" }
-    rescue StandardError => e
-      raise Menu::InteractionMenuError, e.message
-    end
-
-    def show_available_objects
-      @objects.each do |k, v|
-        next if v.empty?
-
-        puts "group: #{k} --- size: #{v.size}\n"
-      end
+    def available_items
+      @objects.map { |key, obj| key if !obj.empty? }.compact
     end
   end
 end
