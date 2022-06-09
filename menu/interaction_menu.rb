@@ -67,10 +67,23 @@ module Menu
       puts obj.to_s
 
       puts "#{Menu::Text::CHOOSE_INDEX} #{user_choice}"
-      InteractionMenu.taping_info(Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym], Menu::Text::AVAILABLE_OBJECTS_ACTIONS)
+      InteractionMenu.taping_info(
+        Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym],
+        Menu::Text::AVAILABLE_OBJECTS_ACTIONS,
+        true
+      )
       actions_index = gets.chomp.to_i
 
-      InteractionMenu.new.send(Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym][actions_index], collection, index_object)
+      action_params = {
+        collection: collection,
+        user_choice: user_choice,
+        index: index_object
+      }
+
+      InteractionMenu.send(
+        Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym][actions_index],
+        action_params
+      )
     rescue Menu::Error => e
       raise Menu::InteractionMenuError, e.message
     end
