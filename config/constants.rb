@@ -1,6 +1,9 @@
 module Config
   module Constants
-    AVAILABLE_ACTIONS = { create_train: { action: "create_train" } }.freeze
-    EXIT_COMMANDS = %w[exit out].freeze
+    AVAILABLE_ACTIONS = %w[create_train present_objects].freeze
+    EXIT_COMMANDS = %w[exit].freeze
+    OBJECTS_ACTIONS = {
+      trains: %w[change_train_number]
+    }.freeze
   end
 end

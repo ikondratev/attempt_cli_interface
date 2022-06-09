@@ -2,12 +2,12 @@ module Trains
   module Services
     class Factory
       class << self
-        def create_train(type:, route:)
+        def create_train(type:, number:)
           case type
           when Trains::Services::Constants::PASSENGER_TYPE
-            Trains::PassengerTrain.new(route: route)
+            Trains::PassengerTrain.new(number: number)
           when Trains::Services::Constants::CARGO_TYPE
-            Trains::CargoTrain.new(route: route)
+            Trains::CargoTrain.new(number: number)
           else
             raise "Type is not allowed"
           end

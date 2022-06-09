@@ -1,6 +1,6 @@
 module Trains
   class CargoTrain < BaseTrain
-    def initialize(route:)
+    def initialize(number:)
       super
 
       @type = Trains::Services::Constants::CARGO_TYPE
