@@ -11,8 +11,10 @@ loop do
   end
 
   return if Config::Constants::EXIT_COMMANDS.include?(user_chose)
-rescue StandardError => e
-  puts "Try again: #{e.message}"
-
+rescue Menu::Error => e
+  puts "#{Config::Constants::AGAIN} #{e.message}"
   next
+rescue StandardError => e
+  puts "#{Config::Constants::CRASH}: #{e.message}"
+  return
 end
