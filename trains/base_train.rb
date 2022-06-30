@@ -3,6 +3,12 @@ module Trains
     attr_accessor :number
     attr_reader :current_station
 
+    @@items = []
+
+    def self.items
+      @@items
+    end
+
     def self.available_trains_types
       "#{Trains::Services::Constants::PASSENGER_TYPE} or #{Trains::Services::Constants::CARGO_TYPE}"
     end
@@ -11,6 +17,7 @@ module Trains
       @number = number
       @current_station = 0
       @route = nil
+      @@items << self
     end
 
     def next_station

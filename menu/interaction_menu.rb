@@ -21,12 +21,13 @@ module Menu
 
     def initialize
       @objects = {
-        trains: []
+        trains: Trains::BaseTrain.items
       }
     end
 
     def create_train
-      @objects[:trains] <<  InteractionMenu.create_new_train
+      # @objects[:trains] <<  InteractionMenu.create_new_train
+      InteractionMenu.create_new_train
     rescue Menu::Error => e
       raise Menu::InteractionMenuError, e.message
     end
