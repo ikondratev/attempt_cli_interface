@@ -6,13 +6,11 @@ loop do
   puts "Enter command:"
   user_chose = gets.chomp
 
-  if Config::Constants::AVAILABLE_ACTIONS.include?(user_chose)
-    @menu.send(user_chose)
-  end
+  @menu.send(user_chose) if Config::Constants::AVAILABLE_ACTIONS.include?(user_chose)
 
   return if Config::Constants::EXIT_COMMANDS.include?(user_chose)
 rescue Menu::Error => e
-  puts "#{Config::Constants::AGAIN} #{e.message}"
+  puts "#{Config::Constants::AGAIN}: #{e.message}"
   next
 rescue StandardError => e
   puts "#{Config::Constants::CRASH}: #{e.message}"
