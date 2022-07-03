@@ -17,8 +17,6 @@ module Menu
     extend Menu::Commands::Train
     extend Menu::Commands::Support
 
-    attr_reader :trains
-
     def initialize
       @objects = {
         trains: Trains::BaseTrain.items
@@ -26,17 +24,16 @@ module Menu
     end
 
     def create_train
-      # @objects[:trains] <<  InteractionMenu.create_new_train
-      InteractionMenu.create_new_train
+      self.class.create_new_train
     rescue Menu::Error => e
       raise Menu::InteractionMenuError, e.message
     end
 
     def show
-      InteractionMenu.clear
-      InteractionMenu.taping_info(available_items, Menu::Text::AVAILABLE_OBJECTS)
-      InteractionMenu.taping_info(Config::Constants::AVAILABLE_ACTIONS, Menu::Text::AVAILABLE_COMMANDS)
-      InteractionMenu.taping_info(Config::Constants::EXIT_COMMANDS, Menu::Text::EXIT_COMMANDS)
+      self.class.clear
+      self.class.taping_info(available_items, Menu::Text::AVAILABLE_OBJECTS)
+      self.class.taping_info(Config::Constants::AVAILABLE_ACTIONS, Menu::Text::AVAILABLE_COMMANDS)
+      self.class.taping_info(Config::Constants::EXIT_COMMANDS, Menu::Text::EXIT_COMMANDS)
     rescue Menu::Error => e
       raise Menu::InteractionMenuError, e.message
     end
@@ -44,22 +41,21 @@ module Menu
     def present_objects
       raise Menu::Text::NOTHING_TO_VIEW if available_items.empty?
 
-      InteractionMenu.clear
-      InteractionMenu.taping_info(available_items, Menu::Text::CHOOSE_OBJECTS_GROUP)
+      self.class.clear
+      self.class.taping_info(available_items, Menu::Text::CHOOSE_OBJECTS_GROUP)
 
       user_choice = gets.chomp.to_sym
 
       raise Menu::Text::UNAVAILABLE_OBJECT unless @objects.include?(user_choice.to_sym)
 
       collection = @objects[user_choice.to_sym]
-
       actions_by_collections_type(collection, user_choice)
     rescue StandardError => e
       raise Menu::InteractionMenuError, e.message
     end
 
     def actions_by_collections_type(collection, user_choice)
-      InteractionMenu.taping_info(collection, user_choice, true)
+      self.class.taping_info(collection, user_choice, true)
 
       puts Menu::Text::CHOOSE_INDEX
       index_object = gets.chomp.to_i
@@ -68,7 +64,7 @@ module Menu
       puts obj.to_s
 
       puts "#{Menu::Text::CHOOSE_INDEX} #{user_choice}"
-      InteractionMenu.taping_info(
+      self.class.taping_info(
         Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym],
         Menu::Text::AVAILABLE_OBJECTS_ACTIONS,
         true
@@ -81,7 +77,7 @@ module Menu
         index: index_object
       }
 
-      InteractionMenu.send(
+      self.class.send(
         Config::Constants::OBJECTS_ACTIONS[user_choice.to_sym][actions_index],
         action_params
       )
